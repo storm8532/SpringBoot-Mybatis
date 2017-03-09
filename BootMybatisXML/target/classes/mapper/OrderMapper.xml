@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mybatis.dao.OrderDao">
+
+    <sql id="orderColumns">
+        o.id AS "id",
+        o.date AS  "date",
+        c.id AS "customer.id",
+        c.name AS  "customer.name",
+        c.addr AS "customer.addr"
+    </sql>
+
+    <sql id="orderJoins">
+        LEFT JOIN customer AS c ON o.customer_id=c.id
+        INNER JOIN order_good AS og ON o.id=og.order_id
+    </sql>
+
+    <select id="findAll" resultMap="OrderResult">
+        SELECT
+          `order`.*,
+          customer.id,
+          customer.name,
+          customer.addr,
+          goods.id,
+          goods.name
+        FROM `order` ,customer, good AS goods, order_good
+        WHERE `order`.customer_id=customer.id
+          AND `order`.id=order_good.order_id
+          AND order_good.good_id=goods.id
+    </select>
+
+    <resultMap type="Order" id="OrderResult">
+        <id column="id" property="id" />
+        <result column="date" property="date" />
+
+        <association property="customer" javaType="com.mybatis.domain.Customer">
+            <id column="id" property="id" />
+            <result column="name" property="name" />
+            <result column="addr" property="addr" />
+        </association>
+
+        <collection property="goods" ofType="com.mybatis.domain.Good">
+            <id column="id" property="gid" />
+            <result column="name" property="gname" />
+        </collection>
+    </resultMap>
+</mapper>
